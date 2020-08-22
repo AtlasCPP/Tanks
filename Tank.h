@@ -65,18 +65,22 @@ public:
     void drawBullets(Window&) const;
     std::list<Bullet>& getStorageBullet();
 
+    void setDeltaCoordinate(coordinate::Coordinate&);
+
     const sf::Sprite& getSprite() const;
     coordinate::Coordinate& getCoordinate();
     void setCoordinate(coordinate::Coordinate&);
     double getDirection() const;
+    void setDirection(double);
+
+    void setRotationSprite(double);
 
     bool searchInField(const coordinate::Coordinate&);
 
     void BulletFlightHandler(sf::Clock& clock);
 
     virtual int get_health() const = 0;
-    virtual void reduce_health(int) = 0;
-    virtual void increase_health(int) = 0;
+    virtual void changeHealth(int) = 0;
     /*
         «акрепл€ет все запросы на 
         изменение значени€ полей

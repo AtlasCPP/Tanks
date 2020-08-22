@@ -1,6 +1,13 @@
 #include "Game.h"
 
-Game::Game() : _player(constants::PLAYER_FILE, constants::PLAYERS_HEALTH, constants::SPEED)
+Game::Game() : 
+                  _player(
+                      constants::PLAYER_FILE,
+                      constants::MAX_PLAYERS_HEALTH,
+                      constants::SPEED
+                      ),
+                   _endGame(false),
+                   _event()
 {
 	/*
 		Инициализируем объекты класса
@@ -36,8 +43,8 @@ void Game::Setup() {
     coordinate::Coordinate C;
     for (int i = 0; i < constants::NUMBER_OF_ENEMIES; ++i) {
         srand(static_cast<unsigned int>(time(0)+i+_clock.getElapsedTime().asMicroseconds()));
-        C.x = rand() % (constants::MAP_WIDTH * constants::CARD_BLOCK_SIDE_SIZE);
-        C.y = rand() % (constants::MAP_HEIGHT * constants::CARD_BLOCK_SIDE_SIZE);
+        C.x = rand() % ((constants::MAP_WIDTH - 2) * (constants::CARD_BLOCK_SIDE_SIZE - 2));
+        C.y = rand() % ((constants::MAP_HEIGHT - 2) * (constants::CARD_BLOCK_SIDE_SIZE - 2));
         iter->setCoordinate(C);
         ++iter;
     }
@@ -110,7 +117,6 @@ void Game::Logic() {
         }
         _player.BulletFlightHandler(_clock);
         collisionHandler();
-        enemyMovementHandler();
     }
     if (_player.get_health() == 0) {
         _endGame = true;
@@ -166,13 +172,39 @@ void Game::Run() {
 void Game::enemyMovementHandler() {
     static sf::Clock timer;
     double time = timer.getElapsedTime().asSeconds();
+    coordinate::Coordinate C;
+    coordinate::Coordinate P = _player.getCoordinate();
     std::list<Enemy>::iterator iter = _enemyList.begin();
     std::list<Enemy>::iterator eiter = _enemyList.end();
     while (iter != eiter) {
-        if (iter->get_health() > 0) {
-            iter->rotation(constants::ROTATION_SPEED, _clock);
-            iter->motion(true, _clock);
-            iter->commitChanges();
+        C = iter->getCoordinate();
+        if ((C.x <= (P.x + 1000.0))
+            &&
+            (C.x >= (P.x - 1000.0))
+            &&
+            (C.y <= (P.y + 1000.0))
+            &&
+            (C.y >= (P.y - 1000.0))
+           ) 
+        {
+            iter->setActivated(true);
+        }
+        else {
+            iter->setActivated(false);
+        }
+        ++iter;
+    }
+    iter = _enemyList.begin();
+    eiter = _enemyList.end();
+    while (iter != eiter) {
+        if ((iter->getActivated()) && (iter->get_health() > 0)) {
+            iter->toFollow(_player.getCoordinate(), _clock);
+            if (iter->checkCoordinates() && iter->getAllowCommit()) {
+                iter->commitChanges();
+            }
+            else {
+                iter->discardChanges();
+            }
             if (time > 3) {
                 iter->shoot();
                 timer.restart();
@@ -180,8 +212,11 @@ void Game::enemyMovementHandler() {
             iter->BulletFlightHandler(_clock);
             ++iter;
         }
-        else {
+        else if (iter->get_health() == 0) {
             iter = _enemyList.erase(iter);
+        }
+        else {
+            ++iter;
         }
     }
     
@@ -200,10 +235,30 @@ void Game::collisionHandler() {
         while (iter != eiter) {
             if (enemIter->searchInField(iter->getCoordinate())) {
                 iter->setFly(false);
-                enemIter->reduce_health(20);
+                enemIter->changeHealth(-20);
             }
             ++iter;
         }
         ++enemIter;
     }
+    enemIter = _enemyList.begin();
+    eenemIter = _enemyList.end();
+    while (enemIter != eenemIter) {
+        if ((enemIter->getCoordinate().x > (_player.getCoordinate().x + 5.0)
+            ||
+            enemIter->getCoordinate().x < (_player.getCoordinate().x - 5.0))
+            &&
+            (enemIter->getCoordinate().y > (_player.getCoordinate().y + 5.0)
+            ||
+            enemIter->getCoordinate().y < (_player.getCoordinate().y - 5.0))
+            ) 
+        {
+            enemIter->setAllowCommit(true);
+        }
+        else {
+            enemIter->setAllowCommit(false);
+        }
+        ++enemIter;
+    }
+    enemyMovementHandler();
 }

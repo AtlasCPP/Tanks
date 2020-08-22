@@ -39,6 +39,10 @@ double Tank::getDirection() const {
     return _direction;
 }
 
+void Tank::setDirection(double value) {
+    _direction = abs(value);
+}
+
 void Tank::rotation(double rotation_value, sf::Clock& clock) {
     double time = clock.getElapsedTime().asMicroseconds();
     time /= 5000;
@@ -57,6 +61,10 @@ void Tank::rotation(double rotation_value, sf::Clock& clock) {
             * constants::pi * 2.0;
     }
     _S.setRotation(_curr_dev_y / constants::pi * 180.0);
+}
+
+void Tank::setRotationSprite(double value) {
+    _S.setRotation(value);
 }
 
 void Tank::motion(bool forward, sf::Clock& clock) {
@@ -152,6 +160,11 @@ void Tank::drawBullets(Window& window) const{
 
 std::list<Bullet>& Tank::getStorageBullet() {
     return _Storage_Bullet;
+}
+
+void Tank::setDeltaCoordinate(coordinate::Coordinate& Coor) {
+    _dx = Coor.x;
+    _dy = Coor.y;
 }
 
 bool Tank::searchInField(const coordinate::Coordinate& Coor) {

@@ -11,14 +11,30 @@
 
 class Enemy : public Tank {
 private:
+	bool _allowCommit;
+	bool _activated;
 protected:
 public:
 	Enemy();
 	~Enemy();
 
+	void toFollow(coordinate::Coordinate&, sf::Clock&);
+
+	bool getAllowCommit();
+	void setAllowCommit(bool);
+
+	bool getActivated();
+	void setActivated(bool);
+	/*
+		Функции, связанные с членом данных health
+	*/
 	int get_health() const;
-	void reduce_health(int);
-	void increase_health(int);
+	void changeHealth(int);
+	/*
+		Выполняет проверку координат
+		на допустимость значений
+	*/
+	bool checkCoordinates();
 };
 
 #endif

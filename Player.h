@@ -13,6 +13,7 @@
 
 class Player : public Tank {
 private:
+    int _points;
     bool _shoot;
 protected:
 public:
@@ -21,14 +22,13 @@ public:
 
     void setShoot(bool);
     bool getShoot() const;
+
+    void changePoints(int);
     /*
-    Функции, связанные с членом данных health, определены
-    в Player из-за reduce_health() - у каждого персонажа
-    своё максимальное здоровье
+        Функции, связанные с членом данных health
     */
     int get_health() const;
-    void reduce_health(int);        
-    void increase_health(int);  
+    void changeHealth(int);
     /*
         Выполняет проверку координат
         на допустимость значений

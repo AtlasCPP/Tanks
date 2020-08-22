@@ -2,7 +2,8 @@
 
 Player::Player(const char* name_image, int h, double s) : 
                    Tank(name_image, h, s),
-                   _shoot(false)
+                   _shoot(false),
+                   _points(0)
 {
 }
 
@@ -14,19 +15,21 @@ int Player::get_health() const {
     return health;
 }
 
-void Player::reduce_health(int value) {
-    health -= value;
-    if (health < 0) 
-    {
+void Player::changeHealth(int value) {
+    if (health + value < 0) {
         health = 0;
+    }
+    else if (health + value > constants::MAX_PLAYERS_HEALTH){
+        health = constants::MAX_PLAYERS_HEALTH;
+    }
+    else {
+        health += value;
     }
 }
 
-void Player::increase_health(int value) {
-    health += value;
-    if (health > constants::PLAYERS_HEALTH) 
-    {
-        health = constants::PLAYERS_HEALTH;
+void Player::changePoints(int value) {
+    if (_points + value < 0) {
+        _points = 0;
     }
 }
 
